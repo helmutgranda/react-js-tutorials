@@ -1,58 +1,45 @@
-import { combineReducers, createStore } from 'redux'
+import { applyMiddleware, createStore } from "redux";
+import axios from 'axios';
+import logger from 'redux-logger';
+import thunk from 'redux-thunk';
+import promisse from 'redux-promise-middleware';
 
-const userReducer = (state = {}, action) => {
+const initialState = {
+    fetching: false,
+    fetched: false,
+    users: [],
+    error: null,
+}
+
+const reducer = (state = {}, action) => {
     switch (action.type) {
-        case 'CHANGE_NAME':
+        case 'FETCH_USERS_START':
             {
-                state = {...state,
-                    name: action.payload
-                }
-                break;
+                return {...state, fetching: true };
             }
-        case 'CHANGE_AGE':
+        case 'FETCH_USERS_ERROR':
             {
-                state = {...state,
-                    age: action.payload
-                }
-                break;
-
+                return {...state, fetching: false, error: action.payload };
             }
-    }
-
+        case 'RECEIVE_USERS':
+            {
+                return {...state, fetching: true, fetched: true, users: action.payload };
+            }
+    };
     return state;
 };
 
-const tweetsReducer = (state = [], actions) => {
-    return state;
-};
+const middleware = applyMiddleware(thunk, logger());
+const store = createStore(reducer, middleware);
 
-const reducers = combineReducers({
-    user: userReducer,
-    tweets: tweetsReducer
-});
+store.dispatch((dispatch) => {
 
-const store = createStore(reducers);
-
-store.subscribe(() => {
-    console.log('store changed', store.getState());
-});
-
-store.dispatch({
-    type: "CHANGE_NAME",
-    payload: "John"
-});
-
-store.dispatch({
-    type: "CHANGE_AGE",
-    payload: 40
-});
-
-store.dispatch({
-    type: "CHANGE_NAME",
-    payload: "Ray"
-});
-
-store.dispatch({
-    type: "CHANGE_AGE",
-    payload: 51
-});
+    dispatch({ type: 'FETCH_USERS_START' });
+    axios.get('http://rest.learncode.academy/api/wstern/users')
+        .then((response) => {
+            dispatch({ type: 'RECEIVE_USERS', payload: response.data });
+        })
+        .catch((err) => {
+            dispatch({ type: 'FETCH_USERS_ERROR', payload: err })
+        })
+})
