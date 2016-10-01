@@ -29,7 +29,7 @@ const tweetsReducer = (state = [], actions) => {
 const reducers = combineReducers({
     user: userReducer,
     tweets: tweetsReducer
-})
+});
 
 const store = createStore(reducers);
 
@@ -40,19 +40,19 @@ store.subscribe(() => {
 store.dispatch({
     type: "CHANGE_NAME",
     payload: "John"
-})
+});
 
 store.dispatch({
     type: "CHANGE_AGE",
     payload: 40
-})
+});
 
 store.dispatch({
     type: "CHANGE_NAME",
     payload: "Ray"
-})
+});
 
 store.dispatch({
     type: "CHANGE_AGE",
     payload: 51
-})
+});
